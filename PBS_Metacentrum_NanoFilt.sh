@@ -13,6 +13,7 @@ module load python36-modules-gcc
 gunzip $SCRATCHDIR/File_concatenated.fastq.gz
 
 NanoFilt -l 3000 -q 7 $SCRATCHDIR/File_concatenated.fastq | gzip > File_concatenated_filtered.fastq.gz
+
 rm ${SCRATCHDIR}/*.fastq
 
 cp -r ${SCRATCHDIR}/* /PATH/to/my/output/folder/ || CLEAN_SCRATCH=true
