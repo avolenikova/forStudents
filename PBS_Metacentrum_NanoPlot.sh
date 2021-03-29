@@ -14,6 +14,6 @@ module load python36-modules-gcc
 
 NanoPlot -t 7 --outdir $SCRATCHDIR/ --prefix Species_ONT_raw_concatenated --N50 --format png --fastq $SCRATCHDIR/File_concatenated.fastq
 
-rm ${SCRATCHDIR}/Pcal_F33n_ONT_raw_concat.fastq
+rm ${SCRATCHDIR}/File_concatenated.fastq
 
 cp -r ${SCRATCHDIR}/* /PATH/to/my/output/folder/ || CLEAN_SCRATCH=true
