@@ -1,0 +1,33 @@
+#!/bin/bash
+#PBS -N purge-dups
+#PBS -l select=1:ncpus=16:mem=64gb:scratch_local=250gb
+#PBS -l walltime=48:00:00
+#PBS -o /storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/dedup/purge-dups_20210519.1737/Ycag_ONT_ALL_corr_smash_ASSEMBLY_contigs_purge-dups.stdout
+#PBS -e /storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/dedup/purge-dups_20210519.1737/Ycag_ONT_ALL_corr_smash_ASSEMBLY_contigs_purge-dups.stderr
+
+trap 'clean_scratch' TERM EXIT
+
+cd ${SCRATCHDIR}
+
+scp /storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/dedup/00_reads/Ycag_ONT_ALL_raw_filt_fmlrc_1lineFIN.fasta.gz ${SCRATCHDIR}
+scp /storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/dedup/00_assembly/Ycag_ONT_ALL_corr_smash_ASSEMBLY_contigs.fasta.gz ${SCRATCHDIR}
+
+module add purge-dups-1.0.1
+
+minimap2 -x map-ont Ycag_ONT_ALL_corr_smash_ASSEMBLY_contigs.fasta.gz Ycag_ONT_ALL_raw_filt_fmlrc_1lineFIN.fasta.gz | gzip -c - > Ycag_ONT_ALL_corr_smash_ASSEMBLY_contigs.paf.gz
+
+pbcstat *paf.gz
+calcuts PB.stat > cutoffs 2>calcuts.log
+
+split_fa Ycag_ONT_ALL_corr_smash_ASSEMBLY_contigs.fasta.gz > Ycag_ONT_ALL_corr_smash_ASSEMBLY_contigs.fasta.gz.split
+minimap2 -xasm5 -DP Ycag_ONT_ALL_corr_smash_ASSEMBLY_contigs.fasta.gz.split Ycag_ONT_ALL_corr_smash_ASSEMBLY_contigs.fasta.gz.split | gzip -c - > Ycag_ONT_ALL_corr_smash_ASSEMBLY_contigs.fasta.gz.split.self.paf.gz
+
+purge_dups -2 -T cutoffs -c PB.base.cov Ycag_ONT_ALL_corr_smash_ASSEMBLY_contigs.fasta.gz.split.self.paf.gz > dups.bed 2>purge_dups.log
+
+get_seqs dups.bed Ycag_ONT_ALL_corr_smash_ASSEMBLY_contigs.fasta.gz
+
+rm ${SCRATCHDIR}/Ycag_ONT_ALL_corr_smash_ASSEMBLY_contigs.fasta.gz
+rm ${SCRATCHDIR}/Ycag_ONT_ALL_raw_filt_fmlrc_1lineFIN.fasta.gz
+
+scp -r ${SCRATCHDIR}/* /storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/dedup/purge-dups_20210519.1737 || export CLEAN_SCRATCH=true
+

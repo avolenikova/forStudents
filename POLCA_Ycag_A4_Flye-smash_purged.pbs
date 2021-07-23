@@ -1,0 +1,28 @@
+#!/bin/bash
+#PBS -N POLCA
+#PBS -l select=1:ncpus=2:mem=256gb:scratch_local=500gb
+#PBS -l walltime=96:00:00
+#PBS -o /storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/polish/02_POLCA/POLCA_20210528.1630/Ycag_A4_Flye-smash_purged_POLCA.stdout
+#PBS -e /storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/polish/02_POLCA/POLCA_20210528.1630/Ycag_A4_Flye-smash_purged_POLCA.stderr
+
+trap 'clean_scratch' TERM EXIT
+
+cd ${SCRATCHDIR}
+
+#scp /storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/polish/01_reads/H2LF2BCXY_YcagNLa2016PE_16s006016-1-1_Nguyen_lane116s006016_trimmed_1P.fastq ${SCRATCHDIR}
+#scp /storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/polish/01_reads/H2LF2BCXY_YcagNLa2016PE_16s006016-1-1_Nguyen_lane116s006016_trimmed_1P.fastq2.fastq ${SCRATCHDIR}
+#scp /storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/polish/01_genome/Ycag_A4_Flye-smash_purged.fasta ${SCRATCHDIR}
+scp /storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/polish/00_singularity/masurca.sif ${SCRATCHDIR}
+
+singularity instance start masurca.sif masurca
+singularity exec instance://masurca polca.sh \
+-a /storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/polish/01_genome/Ycag_A4_Flye-smash_purged.fasta \
+-r '/storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/polish/01_reads/H2LF2BCXY_YcagNLa2016PE_16s006016-1-1_Nguyen_lane116s006016_trimmed_1P.fastq /storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/polish/01_reads/H2LF2BCXY_YcagNLa2016PE_16s006016-1-1_Nguyen_lane116s006016_trimmed_2P.fastq' -t 1 -m 250G
+
+#rm ${SCRATCHDIR}/Ycag_A4_Flye-smash_purged.fasta
+#rm ${SCRATCHDIR}/H2LF2BCXY_YcagNLa2016PE_16s006016-1-1_Nguyen_lane116s006016_trimmed_1P.fastq
+#rm ${SCRATCHDIR}/H2LF2BCXY_YcagNLa2016PE_16s006016-1-1_Nguyen_lane116s006016_trimmed_1P.fastq2.fastq
+rm ${SCRATCHDIR}/masurca.sif
+
+scp -r ${SCRATCHDIR}/* /storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/polish/02_POLCA/POLCA_20210528.1630 || export CLEAN_SCRATCH=true
+
