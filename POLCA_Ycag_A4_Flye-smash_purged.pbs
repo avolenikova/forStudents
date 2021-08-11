@@ -9,6 +9,7 @@ trap 'clean_scratch' TERM EXIT
 
 cd ${SCRATCHDIR}
 
+#WARNING:data are not copied to scratch because POLCA does not work with data from scratch, don't ask me why; absolute paths to the original data are used instead in POLCA command 
 #scp /storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/polish/01_reads/H2LF2BCXY_YcagNLa2016PE_16s006016-1-1_Nguyen_lane116s006016_trimmed_1P.fastq ${SCRATCHDIR}
 #scp /storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/polish/01_reads/H2LF2BCXY_YcagNLa2016PE_16s006016-1-1_Nguyen_lane116s006016_trimmed_1P.fastq2.fastq ${SCRATCHDIR}
 #scp /storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/polish/01_genome/Ycag_A4_Flye-smash_purged.fasta ${SCRATCHDIR}
@@ -24,5 +25,6 @@ singularity exec instance://masurca polca.sh \
 #rm ${SCRATCHDIR}/H2LF2BCXY_YcagNLa2016PE_16s006016-1-1_Nguyen_lane116s006016_trimmed_1P.fastq2.fastq
 rm ${SCRATCHDIR}/masurca.sif
 
+#WARNING:OUTPUTS may be located in a weird folder, for me it is /storage/brno3-cerit/home/volen_a/ by deafult; again I don't know why, so please don't ask me... damn POLCA
 scp -r ${SCRATCHDIR}/* /storage/brno11-elixir/home/volen_a/2020_data_ONT/ycag/polish/02_POLCA/POLCA_20210528.1630 || export CLEAN_SCRATCH=true
 
